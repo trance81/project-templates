@@ -1,0 +1,5 @@
+# 로컬 전용 지식 (접속정보·개인메모)
+pjt-docs/local/
+
+# Claude 로컬 설정
+.claude/settings.local.json
