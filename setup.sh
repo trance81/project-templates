@@ -17,6 +17,7 @@ $MARKER
 - 정본: https://github.com/trance81/project-templates.git (로컬: $REPO_PATH)
 - 새 프로젝트 시작, 기존 프로젝트 분석/개발 시 STRUCTURE.md의 pjt-docs/ 구조로 지식을 구성·유지할 것
 - 프로젝트에 pjt-docs/가 없으면 도입을 제안할 것
+- ~/.claude/pjt-templates-skills-state.json 이 없으면(스킬 동기화를 한 번도 안 돌린 PC) global-skills/sync 실행을 먼저 안내할 것
 EOF
   echo "등록 완료: $GLOBAL_MD"
 fi

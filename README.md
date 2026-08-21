@@ -15,6 +15,9 @@
 | [STRUCTURE.md](STRUCTURE.md) | 지식관리 구조 표준 정의서 (정본) |
 | [template/](template/) | 새 프로젝트에 복사해 쓰는 뼈대 (각 폴더에 예시 포함) |
 | [adopt.md](adopt.md) | 기존 프로젝트(.claude 등에 지식 산재)에 구조를 도입하는 절차 |
+| [update.md](update.md) | 이미 도입한 프로젝트를 최신 표준으로 갱신하는 절차 |
+| [global-skills/](global-skills/) | PC 전역 플러그인·스킬 설치 목록 + 동기화 스크립트 (SETUP.md 참조) |
+| [global-skills/skills/baton-init/](global-skills/skills/baton-init/) | 세션 간 진행 중 작업 상태(`.baton/`)를 도입하는 스킬 (STRUCTURE.md 8장 참조) |
 
 ## 사용법
 
@@ -27,6 +30,18 @@
 ### 기존 프로젝트
 
 [adopt.md](adopt.md) 절차를 따른다. 핵심: 기존 CLAUDE.md / `.claude/` 안의 지식을 유형별로 `pjt-docs/` 하위로 이관하고, CLAUDE.md는 얇은 진입점으로 축소.
+
+### 이미 도입한 프로젝트 갱신
+
+표준이 바뀌면 [update.md](update.md) 절차를 따른다. AI에게 "pjt-docs 최신 표준으로 갱신해줘"라고
+요청하면 된다. 프로젝트의 `pjt-docs/README.md`에 적힌 표준 갱신일이 [STRUCTURE.md](STRUCTURE.md)의
+값보다 오래됐다면 갱신할 때가 된 것이다.
+
+PC에 설치된 스킬 갱신은 별개다. `global-skills/sync.ps1 -Update`(또는 `sync.sh --update`)를 쓴다.
+
+### 진행 중 작업 상태 (선택)
+
+여러 세션에 걸치는 작업이 있으면 `baton-init` 스킬로 `.baton/`을 추가로 도입한다 (STRUCTURE.md 8장). `global-skills/sync`로 설치되며, `pjt-docs/`(확정 지식)와는 레이어가 다르다.
 
 ### AI 전역 연결
 

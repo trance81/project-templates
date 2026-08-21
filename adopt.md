@@ -2,6 +2,8 @@
 
 `.claude/`와 CLAUDE.md에 지식이 산재한 기존 프로젝트에 pjt-docs 구조를 도입하는 절차. AI에게 "이 프로젝트에 pjt-docs 구조 도입해줘"라고 요청하면 이 절차를 따른다.
 
+이미 도입한 프로젝트를 최신 표준에 맞추는 것은 [update.md](update.md)를 본다.
+
 ## 1. 현황 파악
 
 - CLAUDE.md, `.claude/` 하위(rules/, local/, memory/, 프로젝트정보/ 등), docs/, 흩어진 md 파일을 전부 나열
@@ -18,6 +20,7 @@
 | 재사용 가능 노하우 | `pjt-docs/skills/` |
 | DB 접속정보 등 비밀 (.claude/local/ 등) | `pjt-docs/local/` (.gitignore 확인) |
 | 도구 설정 (settings.json, hooks, 플러그인) | `.claude/`에 그대로 둠 |
+| 진행중인데 아직 안 끝난 작업(다음 세션에 이어야 함) | `.baton/` (`baton-init` 스킬로 도입, STRUCTURE.md 8장) |
 
 ## 2. 이관
 
@@ -33,7 +36,7 @@
 
 ## 4. 마무리
 
-- `pjt-docs/README.md` 인덱스 작성 (전 문서 등재)
+- `pjt-docs/README.md` 인덱스 작성 (전 문서 등재). 상단 `표준 갱신일`은 정본 `STRUCTURE.md`의 값을 그대로 적는다 — 이후 [update.md](update.md)가 이 값으로 뒤처짐을 판단한다
 - `pjt-docs/CHANGELOG.md`에 "pjt-docs 구조 도입, X개 문서 이관" 기록
 - `.gitignore`에 `pjt-docs/local/` 추가
 - 커밋: `docs: pjt-docs 지식관리 구조 도입`

@@ -7,6 +7,7 @@
 작업 전 반드시 읽을 것: pjt-docs/overview.md, 관련 domain/ 문서.
 
 ## 규칙
-- 지식 변경 시 같은 커밋에서 pjt-docs/README.md 인덱스와 CHANGELOG.md 갱신
-- 코드/동작 변경 시 관련 pjt-docs 문서 같은 커밋에서 갱신
-- AI 도구 폴더(.claude, .cursor 등)에는 지식을 넣지 않는다 (도구 설정 전용)
+- **IMPORTANT**: 아키텍처·방식 결정 전 `pjt-docs/decisions/`를 먼저 확인할 것. 기존 결정을 뒤집으려면 해당 문서의 `revisit` 조건 충족 여부부터 확인하고, 새 결정은 구현 전에 결정 문서 초안부터 작성할 것.
+- **IMPORTANT**: 지식 변경 시 같은 커밋에서 pjt-docs/README.md 인덱스와 CHANGELOG.md 갱신. 코드/동작 변경 시 관련 pjt-docs 문서도 같은 커밋에서 갱신 — 틀린 지식은 없는 지식보다 나쁘다.
+- AI 도구 폴더(.claude, .cursor 등)에는 절대 지식을 넣지 않는다 (도구 설정 전용). 폐기 문서는 삭제하지 않는다 — `status: deprecated` + 대체 링크 배너.
+- 여러 세션에 걸치는 작업은 `baton-init` 스킬로 `.baton/`을 도입하면 세션 사이에 상태를 이어갈 수 있다. 이미 도입돼 있다면 세션을 시작할 때 `.baton/`의 `running`과 `waiting` 배턴부터 확인한다.

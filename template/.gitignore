@@ -3,3 +3,7 @@ pjt-docs/local/
 
 # Claude 로컬 설정
 .claude/settings.local.json
+
+# baton 진행상태 중 기기 로컬 레인 (baton 도입 전에는 해당 폴더가 없어도 무해)
+.baton/.session/
+.baton/local/
