@@ -63,6 +63,20 @@ bento-slides 플러그인이 신규 덱을 만들 때 쓰는 것과 같은 방�
 사용자가 편집기에서 직접 수정한 내용(표지 문구·로고 위치·행 추가 등)이 날아간다.
 JSON을 읽어 **해당 슬라이드/요소만 수정하고 다시 써넣는다.** `docId`·`collab`·`assets` 는 그대로 둔다.
 
+**"최신 버전으로 다시 만들어줘" = 런타임 갱신 요청.** 문서를 다시 짓지 말고 앱 셸만 교체한다:
+```python
+bento_io.refresh_runtime("대상.bento.html")   # 최신 셸 다운로드 → 문서 JSON·docId·collab·assets·<title> 이식, .bak 생성
+```
+결과 보고 시 `bento_io.runtime_version()` 으로 전후 버전을 적는다.
+
+## 규칙 4-1 — 1.0.18+ 스키마 활용 (신규 덱 작성 시)
+
+- 텍스트 요소에 `role`(`title|subtitle|body|kicker`) 부여 — 편집기 *레이아웃 적용*이 이 값으로 매칭한다.
+- 페이지번호·제목·날짜는 `{{page}}` `{{pages}}` `{{title}}` `{{date}}` 토큰으로, 작성자·회사·행사명은 top-level `meta` + `{{author}}` `{{company}}` `{{event}}` 로 한 곳에서 채운다.
+- 부록·백업 자료는 `hidden: true` (화살표·PDF에서 제외, 링크로만 이동). 드릴다운은 기존대로 `stateOf`.
+- 흐름도의 요소 간 화살표는 커넥터(`from`/`to: {el, side:"auto"}`)로.
+- 마무리 검증: `bento_io.check(doc, roles=True)`; 브라우저 콘솔에서는 `window.bento.validate()`.
+
 ## 규칙 5 — 템플릿 추가
 
 - **전역(모든 프로젝트에서 쓸 것)**: `~/.claude/skills/bento-templates/templates/` 에 파일을 넣고
@@ -78,7 +92,7 @@ JSON을 읽어 **해당 슬라이드/요소만 수정하고 다시 써넣는다.
 ~/.claude/skills/bento-templates/
 ├─ SKILL.md         이 파일 — 절차
 ├─ TEMPLATES.md     전역 템플릿 레지스트리 (작성 전 읽을 것)
-├─ bento_io.py      #bento-doc 블록 안전 읽기/쓰기 (이스케이프 처리)
+├─ bento_io.py      #bento-doc 블록 안전 읽기/쓰기 + check/runtime_version/refresh_runtime
 └─ templates/
    ├─ Terra.bento.html          공식 — 프리미엄 제품   (1280×720)
    ├─ Orbital.bento.html        공식 — 다크 몰입형

@@ -7,7 +7,6 @@
 ```
 프로젝트/
 ├─ CLAUDE.md, AGENTS.md          AI 진입점 (Claude / Cursor·Codex 등)
-├─ .cursor/rules/                Cursor 규칙
 ├─ .claude/                      Claude 도구 설정 (지식 없음)
 ├─ scripts/check-docs.py         문서 정합성 검사
 └─ pjt-docs/                     ★ 지식은 전부 여기

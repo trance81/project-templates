@@ -1,59 +1,137 @@
 {
   "$schema": "pjt-templates-global-skills/v1",
   "marketplaces": [
-    { "id": "claude-plugins-official", "type": "github", "repo": "anthropics/claude-plugins-official", "desc": "Anthropic 공식 플러그인 마켓플레이스" },
-    { "id": "awesome-statusline", "type": "github", "repo": "awesomejun/awesome-claude-plugins", "desc": "상태줄 프리셋" },
-    { "id": "bkit-marketplace", "type": "github", "repo": "popup-studio-ai/bkit-claude-code", "desc": "bkit 초보자 온보딩/설정 도구" },
-    { "id": "dotnet-claude-kit", "type": "github", "repo": "codewithmukesh/dotnet-claude-kit", "desc": ".NET 개발 킷" },
-    { "id": "omc", "type": "git", "url": "https://github.com/Yeachan-Heo/oh-my-claudecode.git", "desc": "oh-my-claudecode" },
-    { "id": "bento", "type": "github", "repo": "nyblnet/bento", "desc": "bento 슬라이드/프레젠테이션" },
-    { "id": "caveman", "type": "github", "repo": "JuliusBrussee/caveman", "desc": "케이브맨 압축 응답 모드" },
-    { "id": "claude-code-warp", "type": "github", "repo": "warpdotdev/claude-code-warp", "desc": "Warp 연동 플러그인" },
-    { "id": "claude-community", "type": "github", "repo": "anthropics/claude-plugins-community", "desc": "Anthropic 커뮤니티 플러그인 마켓플레이스" }
+    {
+      "id": "claude-plugins-official",
+      "type": "github",
+      "repo": "anthropics/claude-plugins-official",
+      "desc": "Anthropic 공식 플러그인 마켓플레이스"
+    },
+    {
+      "id": "awesome-statusline",
+      "type": "github",
+      "repo": "awesomejun/awesome-claude-plugins",
+      "desc": "상태줄 프리셋"
+    },
+    {
+      "id": "bkit-marketplace",
+      "type": "github",
+      "repo": "popup-studio-ai/bkit-claude-code",
+      "desc": "bkit 초보자 온보딩/설정 도구"
+    },
+    {
+      "id": "dotnet-claude-kit",
+      "type": "github",
+      "repo": "codewithmukesh/dotnet-claude-kit",
+      "desc": ".NET 개발 킷"
+    },
+    {
+      "id": "omc",
+      "type": "git",
+      "url": "https://github.com/Yeachan-Heo/oh-my-claudecode.git",
+      "desc": "oh-my-claudecode"
+    },
+    {
+      "id": "bento",
+      "type": "github",
+      "repo": "nyblnet/bento",
+      "desc": "bento 슬라이드/프레젠테이션"
+    },
+    {
+      "id": "caveman",
+      "type": "github",
+      "repo": "JuliusBrussee/caveman",
+      "desc": "케이브맨 압축 응답 모드"
+    },
+    {
+      "id": "claude-code-warp",
+      "type": "github",
+      "repo": "warpdotdev/claude-code-warp",
+      "desc": "Warp 연동 플러그인"
+    },
+    {
+      "id": "claude-community",
+      "type": "github",
+      "repo": "anthropics/claude-plugins-community",
+      "desc": "Anthropic 커뮤니티 플러그인 마켓플레이스"
+    }
   ],
   "plugins": [
-    { "id": "awesome-statusline@awesome-statusline", "desc": "상태줄 프리셋 설치/전환" },
-    { "id": "skill-creator@claude-plugins-official", "desc": "스킬 생성/편집/평가 도구" },
-    { "id": "bkit-starter@bkit-marketplace", "desc": "초보자 온보딩, 프로젝트 설정 생성" },
-    { "id": "csharp-lsp@claude-plugins-official", "desc": "C# 언어 서버 지원" },
-    { "id": "dotnet-claude-kit@dotnet-claude-kit", "desc": ".NET 프로젝트 개발 도구" },
-    { "id": "oh-my-claudecode@omc", "desc": "oh-my-claudecode 유틸리티 모음" },
-    { "id": "superpowers@claude-plugins-official", "desc": "브레인스토밍/TDD/디버깅/코드리뷰 프로세스 스킬" },
-    { "id": "bento-slides@bento", "desc": "단일 파일 프레젠테이션(.bento.html) 생성/편집" },
-    { "id": "caveman@caveman", "desc": "케이브맨 말투 압축 응답 모드" },
-    { "id": "warp@claude-code-warp", "desc": "Warp 터미널 연동" },
-    { "id": "eli5@claude-community", "desc": "쉬운 설명(ELI5) 스킬" }
+    {
+      "id": "awesome-statusline@awesome-statusline",
+      "desc": "상태줄 프리셋 설치/전환"
+    },
+    {
+      "id": "skill-creator@claude-plugins-official",
+      "desc": "스킬 생성/편집/평가 도구"
+    },
+    {
+      "id": "bkit-starter@bkit-marketplace",
+      "desc": "초보자 온보딩, 프로젝트 설정 생성"
+    },
+    {
+      "id": "csharp-lsp@claude-plugins-official",
+      "desc": "C# 언어 서버 지원"
+    },
+    {
+      "id": "dotnet-claude-kit@dotnet-claude-kit",
+      "desc": ".NET 프로젝트 개발 도구"
+    },
+    {
+      "id": "oh-my-claudecode@omc",
+      "desc": "oh-my-claudecode 유틸리티 모음"
+    },
+    {
+      "id": "superpowers@claude-plugins-official",
+      "desc": "브레인스토밍/TDD/디버깅/코드리뷰 프로세스 스킬"
+    },
+    {
+      "id": "bento-slides@bento",
+      "desc": "단일 파일 프레젠테이션(.bento.html) 생성/편집"
+    },
+    {
+      "id": "caveman@caveman",
+      "desc": "케이브맨 말투 압축 응답 모드"
+    },
+    {
+      "id": "warp@claude-code-warp",
+      "desc": "Warp 터미널 연동"
+    },
+    {
+      "id": "eli5@claude-community",
+      "desc": "쉬운 설명(ELI5) 스킬"
+    }
   ],
   "_skillsNote": "skills[]: installCmd 있으면 그 명령으로 설치, path 있으면 이 리포에서 복사(path는 global-skills/ 기준 상대경로). 설치 위치는 둘 다 ~/.claude/skills/<id>",
   "skills": [
     {
       "id": "hallmark",
       "repo": "nutlope/hallmark",
-      "installCmd": "npx skills add nutlope/hallmark",
+      "installCmd": "npx -y skills add nutlope/hallmark -g -y",
       "desc": "AI티 안 나는 디자인 스킬 (Claude Code/Cursor/Codex 공용)"
     },
     {
       "id": "frontend-slides",
       "repo": "zarazhangrui/frontend-slides",
-      "installCmd": "npx -y skills add zarazhangrui/frontend-slides --skill frontend-slides --agent claude-code",
+      "installCmd": "npx -y skills add zarazhangrui/frontend-slides --skill frontend-slides --agent claude-code -g -y",
       "desc": "애니메이션 풍부한 HTML 프레젠테이션 제작/PPT 변환 (웹검색으로 출처 확인)"
     },
     {
       "id": "gorden-ppt-skill",
       "repo": "GordenSun/GordenPPTSkill",
-      "installCmd": "npx skills add GordenSun/GordenPPTSkill",
+      "installCmd": "npx -y skills add GordenSun/GordenPPTSkill -g -y",
       "desc": "중국어 PPTX 템플릿 기반 비파괴 텍스트 편집 빌더 (웹검색으로 출처 확인, 로컬 버전 1.0.20와 리포 템플릿 수 약간 차이날 수 있음)"
     },
     {
       "id": "youtube-digest",
       "repo": "wjgoarxiv/youtube-digest-skill",
-      "installCmd": "npx skills add wjgoarxiv/youtube-digest-skill",
+      "installCmd": "npx -y skills add wjgoarxiv/youtube-digest-skill -g -y",
       "desc": "유튜브 트랜스크립트 → TL;DR/핵심요약/타임라인 다이제스트 (설명 일치, 확신도 중간 — 설치 후 SKILL.md 대조 권장)"
     },
     {
       "id": "fluent-korean",
       "repo": "snflkd/fluent-korean",
-      "installCmd": "npx skills add snflkd/fluent-korean",
+      "installCmd": "npx -y skills add snflkd/fluent-korean -g -y",
       "desc": "한국어 산출물(문서/보고서/커밋·PR/README/memory 파일 등) 문장 명확성 지침 — caveman과 병행, 대화 응답은 압축 유지·산출물만 적용"
     },
     {

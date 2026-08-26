@@ -27,7 +27,8 @@
 curl -fsSL https://bento.page/releases/slides/Bento_Slides.bento.html -o "<주제>.bento.html"
 ```
 
-받은 파일에는 쇼케이스 덱이 들어 있으므로 `#bento-doc` JSON을 통째로 교체한다.
+받은 파일(1.0.18+)의 `#bento-doc` 블록은 **비어 있다**(브라우저에서 열 때만 쇼케이스를 생성). 그 빈 블록에 문서 JSON을 써넣는다.
+구버전 셸이면 쇼케이스 덱이 들어 있으므로 통째로 교체한다.
 `size`·`theme`(`theme.fontFamily` 포함)은 필수이고, `docId`·`collab` 은 넣지 않는다.
 
 ## 공통 사양
@@ -39,6 +40,10 @@ curl -fsSL https://bento.page/releases/slides/Bento_Slides.bento.html -o "<주�
 | 색상 | 강조색 1개, 서체 2개 이하 |
 | 노트 | 모든 슬라이드에 발표자 노트(`notes`) 필수 |
 | 이미지·폰트 | `doc.assets` 에 data URI 로 임베드하고 `"asset:<키>"` 로 참조 |
+| 텍스트 role | 제목·부제·본문 텍스트에 `role: title|subtitle|body|kicker` 부여 — 편집기 *레이아웃 적용*이 role 로 매칭 (1.0.18+) |
+| 페이지·메타 | 페이지번호·제목·날짜는 텍스트에 `{{page}}` `{{pages}}` `{{title}}` `{{date}}` 토큰, 작성자·회사는 top-level `meta` + `{{author}}` `{{company}}` (1.0.18+) |
+| 부록 슬라이드 | 발표에서 빼고 링크로만 가는 자료는 `hidden: true` (state 슬라이드와 다름) |
+| 흐름도 화살표 | 요소 사이 선은 커넥터(`from`/`to: {el, side}`) — 요소 이동 시 따라감 |
 
 ## 읽기/쓰기 헬퍼
 
@@ -49,4 +54,10 @@ import bento_io
 doc = bento_io.load("대상.bento.html")
 doc["slides"][0]["name"] = "표지"
 bento_io.save("대상.bento.html", doc)     # docId·collab·assets 보존, < 이스케이프
+
+bento_io.check(doc, roles=True)          # notes 누락·여백 침범·role 누락 경고 목록
+bento_io.runtime_version("대상.bento.html")   # 파일에 박힌 앱 버전 (예: '1.0.18')
+bento_io.refresh_runtime("대상.bento.html")   # 앱 런타임만 최신으로 교체 (문서·docId·assets·title 보존, .bak 생성)
 ```
+
+템플릿 파일 4종의 런타임: **1.0.18** (2026-08-18 갱신). 오래되면 `refresh_runtime` 으로 일괄 갱신.

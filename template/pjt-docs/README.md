@@ -1,6 +1,6 @@
 # <프로젝트명> 지식베이스
 
-표준 갱신일: 2026-08-25 <!-- project-templates/STRUCTURE.md 의 값과 맞춘다. 다르면 update.md 절차로 갱신 -->
+표준 갱신일: 2026-08-26 <!-- project-templates/STRUCTURE.md 의 값과 맞춘다. 다르면 update.md 절차로 갱신 -->
 
 ## 이 프로젝트는
 <한 단락 요약. 상세는 [overview.md](overview.md)>

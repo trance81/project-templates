@@ -2,7 +2,7 @@
 
 프로젝트 안의 지식을 AI(Claude, Cursor)와 사람이 구분 없이 읽고 쓰는 구조. 이 문서가 정본이다.
 
-**표준 갱신일: 2026-08-25**
+**표준 갱신일: 2026-08-26**
 
 각 프로젝트의 `pjt-docs/README.md` 상단에도 같은 값을 적어 둔다. 두 값이 다르면 그 프로젝트는
 표준보다 뒤처져 있다는 뜻이므로 [update.md](update.md) 절차로 갱신한다. 이 날짜는 프로젝트가
@@ -14,8 +14,7 @@
 <프로젝트루트>/
   .claude/                      # Claude 도구 설정·플러그인·훅 — 그대로 사용. 지식은 넣지 않는다
   CLAUDE.md                     # 얇은 진입점 (10~20행). 지식 본문 금지
-  AGENTS.md                     # 같은 내용 — Cursor(최신)·Codex 등 공용 규약
-  .cursor/rules/pjt-docs.mdc    # Cursor 진입점 (구버전 Cursor 대비)
+  AGENTS.md                     # 같은 내용 — Cursor·Codex 등 공용 규약
   scripts/check-docs.py         # pjt-docs 정합성 검사 (6장 참조)
   pjt-docs/                     # ★ 지식 정본 — AI·사람 공용
     README.md                   # 통합 인덱스: 지식 지도 + 읽는 순서
@@ -32,9 +31,14 @@
     troubleshooting/            # 문제-해결 기록
       YYYY-MM-DD-<제목>.md
     local/                      # git 미추적: 접속정보·개인메모 (.gitignore 등록)
+  .baton/                       # ★ 진행 중 작업 상태 — 기본 구성 (8장 참조)
+    README.md                   # 운영 규칙
+    <slug>.md                   # 작업 단위 진행상태
 ```
 
-빈 폴더는 만들지 않는다 — 해당 유형의 지식이 처음 생길 때 폴더를 만든다. 필수는 `README.md`, `CHANGELOG.md`, `HELP.md`, `overview.md` 넷이다.
+빈 폴더는 만들지 않는다 — 해당 유형의 지식이 처음 생길 때 폴더를 만든다. `pjt-docs/`의 필수 파일은 `README.md`, `CHANGELOG.md`, `HELP.md`, `overview.md` 넷이다.
+
+`pjt-docs/`와 `.baton/`은 함께 간다. 확정된 지식은 `pjt-docs/`에 두고, 아직 진행 중인 작업 상태는 `.baton/`에 둔다. 도입할 때도 갱신할 때도 둘을 같이 처리한다.
 
 `HELP.md`는 **사람 전용** 확인 문서다 — 폴더 구조 그림, AI에게 자주 쓰는 요청 문구, 문서 규칙 읽는 법, 검사 실행법을 심플하게 담는다. 프론트매터·인덱스 등재 의무가 없고(README/CHANGELOG와 같은 취급), 도입 시 템플릿 그대로 복사하면 된다. 프로젝트 전용 스킬·플러그인을 쓰게 되면 그 사용법도 여기에 한 줄씩 추가한다.
 
@@ -147,6 +151,8 @@ revisit: 검색 실패율 5% 초과 시 / 제품 버전 업그레이드 시 / �
 ## 규칙
 - **IMPORTANT**: 아키텍처·방식 결정 전 `pjt-docs/decisions/`를 먼저 확인할 것. 기존 결정을 뒤집으려면 revisit 조건 충족 여부부터, 새 결정은 구현 전에 결정 문서 초안부터.
 - **IMPORTANT**: 지식 변경 시 같은 커밋에서 pjt-docs/README.md 인덱스와 CHANGELOG.md 갱신. 코드/동작 변경 시 관련 pjt-docs 문서도 같은 커밋에서 갱신.
+- **IMPORTANT**: 세션 시작 시 `.baton/` 최상위의 `running`·`waiting` 배턴만 읽고 그 맥락에서 이어간다. `done/`과 지난 배턴은 관련 있을 때만. 운영 규칙은 `.baton/README.md`.
+- **IMPORTANT**: 프로젝트에 남는 작업(코드·설정 변경, 이 프로젝트의 문서 작업)은 한 턴에 끝나도 배턴 한 장을 만들거나 갱신하고, 끝나면 `status: passed`로 닫는다. 조사·질의응답이나 무관한 산출물에는 만들지 않는다.
 - .claude/에는 지식을 넣지 않는다. 폐기 문서는 삭제 대신 deprecated + 대체 링크.
 ```
 
@@ -154,17 +160,20 @@ revisit: 검색 실패율 5% 초과 시 / 제품 버전 업그레이드 시 / �
 
 ### AGENTS.md (프로젝트 루트)
 
-CLAUDE.md와 같은 내용. Cursor(최신), Codex 등 AGENTS.md 규약을 따르는 도구가 자동으로 읽는다.
+CLAUDE.md와 같은 내용. Cursor, Codex 등 AGENTS.md 규약을 따르는 도구가 자동으로 읽는다.
 
-### .cursor/rules/pjt-docs.mdc
-
-CLAUDE.md와 같은 내용. 상단에 `alwaysApply: true` 프론트매터. (AGENTS.md를 못 읽는 구버전 Cursor 대비)
+진입점은 이 둘뿐이다. 도구마다 전용 규칙 파일을 따로 두지 않는다. 같은 내용을 여러 벌 두면
+한 곳만 고쳐 놓고 나머지를 잊게 되고, 그때부터 어느 것이 정본인지 알 수 없어진다.
 
 ## 8. 진행 중 작업 상태 (.baton/)
 
 `pjt-docs/`는 사람이 정제해서 남긴 확정된 지식을 담는다. 반면에 아직 진행 중이라 확정되지 않은
 작업 상태, 즉 "무슨 작업을 하다가 세션이 끊겼는가"를 담는 자리는 따로 없었다. `.baton/`이 그
 공백을 메운다.
+
+**`.baton/`은 선택 사항이 아니라 표준의 기본 구성이다.** pjt-docs를 도입하는 프로젝트는
+`.baton/`도 함께 만들고, 갱신할 때 없으면 그때 만든다. 둘 다 있어야 "확정된 지식"과
+"진행 중 상태"가 각자 자리를 갖는다.
 
 ```
 <프로젝트루트>/
@@ -184,8 +193,15 @@ CLAUDE.md와 같은 내용. 상단에 `alwaysApply: true` 프론트매터. (AGEN
 - `check-docs.py`의 정합성 검사 대상은 `pjt-docs/`뿐이고 `.baton/`은 검사하지 않는다.
 - 세션을 시작할 때는 `.baton/` 최상위의 `running`과 `waiting` 배턴만 읽는다. `done/`과 지난
   배턴은 지금 요청과 관련이 있을 때만 찾아본다. 전부 읽으면 컨텍스트만 낭비한다.
-- 도입은 `baton-init` 스킬로 한다. 이 리포의 `global-skills/skills/baton-init/`가 정본이며,
-  `global-skills/sync`를 실행하면 `~/.claude/skills/baton-init/`에 설치된다. 이후 프로젝트에서
-  "이 프로젝트에 baton 추가해줘"라고 요청하면 스킬이 `.baton/README.md` 생성, 진입점 포인터 줄
-  추가, 턴 종료 훅 등록까지 처리한다. 상세한 규약과 필드, 제약은 그 폴더의 `SKILL.md`와
-  `templates/baton-readme.md`(설치되는 `.baton/README.md` 원문)가 정본이다.
+- 배턴을 만드는 기준은 **걸린 턴 수가 아니라 프로젝트에 남는 변경인지 여부**다. 한 턴 만에
+  고치고 커밋까지 끝냈어도 코드·설정 변경이나 이 프로젝트의 문서 작업이면 배턴을 남긴다.
+  조사·질의응답으로 끝나는 대화나 프로젝트와 무관한 산출물에는 만들지 않는다. 커밋 수와
+  대응시키지도 않는다 — 커밋이 여러 개여도 한 기능이면 배턴은 한 장이다.
+- 도입은 손으로 파일을 만들지 말고 `baton-init` 스킬로 한다. 스킬이 `.baton/README.md` 생성,
+  진입점 포인터 줄 추가, 턴 종료 훅 등록, `.gitignore` 정리를 한 번에 처리하고, 이미 있는
+  조각은 건드리지 않는다. 이 리포의 `global-skills/skills/baton-init/`가 정본이며,
+  `global-skills/sync`를 실행하면 `~/.claude/skills/baton-init/`에 설치된다. 상세한 규약과
+  필드, 제약은 그 폴더의 `SKILL.md`와 `templates/baton-readme.md`(설치되는 `.baton/README.md`
+  원문)가 정본이다.
+- pjt-docs 도입은 [adopt.md](adopt.md), 기존 프로젝트 갱신은 [update.md](update.md)를 따르며,
+  두 절차 모두 `.baton/`이 없으면 만드는 단계를 포함한다.

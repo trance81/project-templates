@@ -4,15 +4,39 @@
 
 ## 제일 쉬운 방법 — AI에게 시키기
 
-새 PC의 Claude CLI(또는 다른 AI 도구)에서 이렇게 요청하면 끝:
+새 PC의 Claude CLI(또는 다른 AI 도구)에서 이 한 줄이면 끝난다.
 
 > https://github.com/trance81/project-templates.git 클론해서 SETUP.md대로 전역 세팅해줘
 
-AI가 할 일 (이 문서가 절차 정본):
-1. 리포를 durable한 위치(예: `~/Workspace/project-templates` 등)에 클론 — 임시 폴더 금지
-2. `setup.ps1`(Windows) / `setup.sh`(macOS/Linux) 실행 → 전역 등록
-3. `global-skills/sync.ps1` / `sync.sh` 실행 안내 → 사용자가 항목별 y/N 선택 (AI가 임의로 전부 설치하지 말 것)
-4. Cursor 쓰는 PC면: Settings → Rules → User Rules에 아래 "수동 > Cursor" 절의 블록 붙여넣으라고 안내 (앱 설정 화면이라 AI가 대신 못 함)
+**AI가 따를 절차** (이 문서가 정본이다):
+
+1. 리포를 오래 둘 위치(예: `~/Workspace/project-templates`)에 클론한다. 임시 폴더는 안 된다 —
+   전역 지시가 이 경로를 가리키게 되므로 지워지면 안 되기 때문이다.
+2. `setup.ps1`(Windows) 또는 `setup.sh`(macOS/Linux)를 실행해 전역 지시 블록을 등록한다.
+3. 설치 후보를 뽑는다. 아무것도 바꾸지 않고 목록만 출력한다.
+
+   ```powershell
+   .\global-skills\sync.ps1 -List        # Windows
+   ```
+   ```bash
+   ./global-skills/sync.sh --list        # macOS / Linux
+   ```
+
+4. 그 목록을 사용자에게 정리해서 보여주고 **한 번만 묻는다.** "이대로 전부 설치할까, 뺄 것이
+   있나" 정도면 된다. 항목마다 따로 묻지 않는다.
+5. 답을 그대로 넘겨 설치한다. 고르지 않은 항목은 결정을 남기지 않으므로 다음에 다시 물어본다.
+
+   ```powershell
+   .\global-skills\sync.ps1 -Only baton-init,hallmark
+   ```
+   ```bash
+   ./global-skills/sync.sh --only baton-init,hallmark
+   ```
+
+   전부 설치하기로 했으면 `-Yes` / `--yes` 를 쓴다.
+6. Cursor를 쓰는 PC면 아래 "수동 > Cursor" 절의 블록을 Settings → Rules → User Rules에
+   붙여넣으라고 안내한다. 앱 설정 화면이라 AI가 대신 할 수 없다.
+7. 플러그인을 설치했으면 Claude Code를 재시작해야 반영된다고 알린다.
 
 ## 자동 (권장)
 
@@ -47,13 +71,14 @@ cd project-templates
 - 정본: https://github.com/trance81/project-templates.git (로컬: <클론경로>)
 - 새 프로젝트 시작, 기존 프로젝트 분석/개발 시 STRUCTURE.md의 pjt-docs/ 구조로 지식을 구성·유지할 것
 - 프로젝트에 pjt-docs/가 없으면 도입을 제안할 것
+- 프로젝트 pjt-docs/README.md 상단의 `표준 갱신일`이 STRUCTURE.md의 값보다 오래됐거나 아예 없으면 update.md 절차로 갱신을 제안할 것
 - ~/.claude/pjt-templates-skills-state.json 이 없으면(스킬 동기화를 한 번도 안 돌린 PC) global-skills/sync 실행을 먼저 안내할 것
 ```
 
 ### Cursor
 
 Cursor는 파일 기반 전역 규칙이 없다. Settings → Rules → User Rules에 위 블록을 붙여넣는다.
-프로젝트 단위로는 템플릿의 `.cursor/rules/pjt-docs.mdc`가 자동 적용된다.
+프로젝트 단위로는 템플릿의 `AGENTS.md`를 Cursor가 자동으로 읽는다.
 
 ### 기타 AI 도구 (Codex, Copilot 등 — 향후)
 
@@ -80,6 +105,8 @@ cd project-templates/global-skills
 
 - 이미 설치돼 있거나 이전에 "설치/건너뜀"으로 결정한 항목은 다시 안 물어본다 (결정은 `~/.claude/pjt-templates-skills-state.json`에 기록).
 - 리포에 새 항목이 추가된 뒤 재실행하면 **그 신규 항목만** 물어본다 — 기존 결정은 그대로 유지.
+- 설치하지 않고 후보만 보려면: `.\sync.ps1 -List` / `./sync.sh --list`
+- 고른 것만 묻지 않고 설치하려면: `.\sync.ps1 -Only a,b` / `./sync.sh --only a,b`
 - 건너뛴 항목을 다시 검토하려면: `.\sync.ps1 -Review` / `./sync.sh --review`
 - 이미 설치된 것을 최신으로 갱신하려면: `.\sync.ps1 -Update` / `./sync.sh --update`. 새로 설치하지는 않고, 리포에 소스가 있는 스킬은 내용을 대조해 다를 때만 묻고 교체한다. 플러그인 갱신은 Claude Code 재시작 후 반영된다.
 - 새 플러그인을 설치했으면 `global-skills/manifest.json`에 항목을 추가해 다른 PC에도 전파되게 할 것.

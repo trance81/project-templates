@@ -4,12 +4,12 @@
 # 리포가 갱신된 뒤 재실행하면 새로 추가된 항목만 새로 물어본다(기존 결정은 재사용).
 # 옵션: --review  과거 "건너뜀" 항목도 다시 물어본다
 #       --update  설치는 하지 않고, 이미 설치된 것을 리포 최신 내용으로 갱신한다
+#       --yes     묻지 않고 전부 y 로 답한다. 터미널이 아닌 곳에서 돌릴 때 쓴다
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$REPO_ROOT/global-skills/manifest.json"
 STATE_PATH="$HOME/.claude/pjt-templates-skills-state.json"
-MODE="${1:-}"
 
 PY="$(command -v python3 || command -v python || true)"
 [ -n "$PY" ] || { echo "python3 가 필요합니다."; exit 1; }
@@ -21,4 +21,4 @@ echo "1) 리포 최신화 ($REPO_ROOT)"
 mkdir -p "$(dirname "$STATE_PATH")"
 [ -f "$STATE_PATH" ] || echo '{}' > "$STATE_PATH"
 
-"$PY" "$REPO_ROOT/global-skills/sync.py" "$MANIFEST" "$STATE_PATH" "$MODE"
+"$PY" "$REPO_ROOT/global-skills/sync.py" "$MANIFEST" "$STATE_PATH" "$@"

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """전역 플러그인/스킬 동기화 — manifest.json vs 로컬 상태 diff 후 신규 항목만 확인받아 설치.
-sync.sh 가 호출한다. 인자: <manifest.json> <state.json> [--review|--update]
+sync.sh 가 호출한다. 인자: <manifest.json> <state.json> [옵션...]
 
-  (없음)     아직 설치 여부를 정하지 않은 항목만 물어보고 설치한다.
-  --review   과거에 "건너뜀"으로 결정한 항목도 다시 물어본다.
-  --update   설치를 새로 하지 않고, 이미 설치된 것을 최신으로 갱신한다.
+  (없음)       아직 설치 여부를 정하지 않은 항목만 물어보고 설치한다.
+  --review     과거에 "건너뜀"으로 결정한 항목도 다시 물어본다.
+  --update     설치를 새로 하지 않고, 이미 설치된 것을 최신으로 갱신한다.
+  --yes        묻지 않고 전부 y 로 답한다. 터미널이 아닌 곳에서 돌릴 때 쓴다.
+  --list       아무것도 설치하지 않고, 물어볼 항목만 출력한다.
+  --only a,b   지정한 id 만 묻지 않고 설치한다. --list 로 목록을 뽑아
+               사용자에게 고르게 한 뒤 그 답을 그대로 넘기는 용도다.
 """
 import hashlib
 import json
@@ -17,9 +21,41 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
     sys.stdout.reconfigure(encoding="utf-8")  # Windows cp949 — desc 의 한글·em dash 출력 대비
 
 manifest_path, state_path = sys.argv[1], sys.argv[2]
-mode = sys.argv[3] if len(sys.argv) > 3 else ""
-review = mode == "--review"
-update = mode == "--update"
+flags = sys.argv[3:]
+review = "--review" in flags
+update = "--update" in flags
+assume_yes = "--yes" in flags
+list_only = "--list" in flags
+
+only = None
+for f in flags:
+    if f.startswith("--only"):
+        raw = f.split("=", 1)[1] if "=" in f else flags[flags.index(f) + 1]
+        only = {x.strip() for x in raw.split(",") if x.strip()}
+if only is not None:
+    assume_yes = True   # 고를 항목을 이미 받았으니 다시 묻지 않는다
+
+NOT_INTERACTIVE = (
+    "입력이 터미널이 아니어서 y/N 을 물어볼 수 없다. 아무것도 바꾸지 않고 끝낸다.\n"
+    "실제 터미널에서 실행하거나, 전부 설치할 생각이면 --yes 를 붙여라."
+)
+
+# 이 스크립트는 항목마다 y/N 을 물어본다. 입력이 터미널이 아니면 답을 받을 수 없는데, 그대로 두면
+# EOF 를 "아니오"로 읽어 묻지도 않은 항목을 skipped 로 기록해 버린다. 그런 결정이 상태 파일에
+# 남으면 다음 실행 때 다시 묻지 않으므로 미리 막는다.
+if not sys.stdin.isatty() and not (assume_yes or list_only):
+    print(NOT_INTERACTIVE)
+    sys.exit(2)
+
+
+def prompt(text):
+    """y/N 을 받는다. Windows 에서는 리다이렉트를 isatty 로 못 걸러내는 경우가 있어
+    (예: NUL 을 stdin 으로 주면 문자 장치라 isatty 가 True 다) EOF 도 함께 막는다."""
+    try:
+        return input(text).strip().lower() == "y"
+    except EOFError:
+        print(f"\n{NOT_INTERACTIVE}")
+        sys.exit(2)
 
 home = Path.home()
 manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
@@ -44,16 +80,38 @@ def already_installed(kind, key):
     return False
 
 
-def ask(state_key, desc):
+def pending(kind, item_id, state_key):
+    """아직 설치도 안 됐고 결정도 안 난 항목인가. 물어볼 대상인지 판단한다."""
+    if already_installed(kind, item_id):
+        return False
+    return state_key not in state or review
+
+
+def ask(state_key, desc, item_id=None):
     if state_key in state and not review:
         return None
+    if only is not None and item_id not in only:
+        return None   # 고르지 않은 항목은 결정도 남기지 않는다
     print(f"\n[{state_key}]\n  {desc}")
-    ans = input("  설치할까? (y/N) ").strip().lower()
-    return ans == "y"
+    if assume_yes:
+        print("  설치할까? (y/N) y")
+        return True
+    return prompt("  설치할까? (y/N) ")
 
 
 def run(cmd):
-    subprocess.run(cmd, shell=True, check=True)
+    # 홈에서 실행한다. `npx skills add` 류는 전역 플래그가 빠지면 현재 폴더에 설치하는데,
+    # 리포 안에서 sync 를 돌리는 게 보통이라 그대로 두면 리포를 오염시킨다.
+    subprocess.run(cmd, shell=True, check=True, cwd=home)
+
+
+def verify_skill(skill_id):
+    """설치 명령이 성공했다고 해서 전역에 들어갔다는 보장이 없다. 실제로 확인한다."""
+    if not (home / ".claude/skills" / skill_id).exists():
+        raise RuntimeError(
+            f"명령은 끝났지만 ~/.claude/skills/{skill_id} 가 없다. "
+            "설치 명령에 전역 플래그(-g)가 빠졌을 수 있다"
+        )
 
 
 failures = []
@@ -75,18 +133,56 @@ def install(key, action):
 skills_base = Path(manifest_path).resolve().parent
 
 
+# 실행 중 저절로 생기는 것들. 대조에서 빼지 않으면 갱신할 게 없는데도 매번 "다르다"고 나온다.
+IGNORED_DIRS = {"__pycache__", ".git", "node_modules", ".venv"}
+IGNORED_NAMES = {".DS_Store", "Thumbs.db"}
+
+
 def tree_hash(root):
     """폴더 안 모든 파일의 상대경로와 내용을 합쳐 해시한다. 내용이 같으면 같은 값이 나온다."""
+    root = Path(root)
     h = hashlib.sha256()
-    for p in sorted(Path(root).rglob("*")):
-        if p.is_file():
-            h.update(p.relative_to(root).as_posix().encode())
-            h.update(p.read_bytes())
+    for p in sorted(root.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(root)
+        if set(rel.parts) & IGNORED_DIRS or rel.name in IGNORED_NAMES or rel.suffix == ".pyc":
+            continue
+        h.update(rel.as_posix().encode())
+        h.update(p.read_bytes())
     return h.hexdigest()
 
 
-def confirm(prompt):
-    return input(f"  {prompt} (y/N) ").strip().lower() == "y"
+def confirm(text):
+    if assume_yes:
+        print(f"  {text} (y/N) y  [--yes]")
+        return True
+    return prompt(f"  {text} (y/N) ")
+
+
+if list_only:
+    # 아무것도 바꾸지 않고, 물어볼 항목만 보여준다. AI 가 이 목록을 사용자에게 제시하고
+    # 답을 받아 --only 로 되돌려주는 흐름을 염두에 둔 출력이다.
+    groups = [
+        ("마켓플레이스", "marketplace", manifest.get("marketplaces", [])),
+        ("플러그인", "plugin", manifest.get("plugins", [])),
+        ("스킬", "skill", manifest.get("skills", [])),
+    ]
+    total = 0
+    for label, kind, items in groups:
+        rows = [i for i in items if pending(kind, i["id"], f"{kind}:{i['id']}")]
+        if not rows:
+            continue
+        print(f"\n[{label}]")
+        for i in rows:
+            print(f"  {i['id']}\n      {i['desc']}")
+        total += len(rows)
+    if total == 0:
+        print("설치할 새 항목이 없다. 전부 설치됐거나 이미 결정된 상태다.")
+    else:
+        print(f"\n총 {total}건. 설치하려면 --only 에 id 를 쉼표로 이어 넘긴다.")
+        print("예: --only baton-init,hallmark")
+    sys.exit(0)
 
 
 if update:
@@ -117,7 +213,11 @@ if update:
             print(f"\n[{s['id']}] 외부 스킬이라 최신 여부를 대조할 수 없다")
             print(f"  설치 명령: {s['installCmd']}")
             if confirm("설치 명령을 다시 실행할까?"):
-                install(f"update:skill:{s['id']}", lambda s=s: run(s["installCmd"]))
+                def rerun(s=s):
+                    run(s["installCmd"])
+                    verify_skill(s["id"])
+
+                install(f"update:skill:{s['id']}", rerun)
             continue
 
         src = skills_base / s["path"]
@@ -155,7 +255,7 @@ for m in manifest.get("marketplaces", []):
     if already_installed("marketplace", m["id"]):
         state[key] = "installed(기존)"
         continue
-    want = ask(key, m["desc"])
+    want = ask(key, m["desc"], m["id"])
     if want is None:
         continue
     if want:
@@ -171,7 +271,7 @@ for p in manifest.get("plugins", []):
     if already_installed("plugin", p["id"]):
         state[key] = "installed(기존)"
         continue
-    want = ask(key, p["desc"])
+    want = ask(key, p["desc"], p["id"])
     if want is None:
         continue
     if want:
@@ -186,7 +286,7 @@ for s in manifest.get("skills", []):
     if already_installed("skill", s["id"]):
         state[key] = "installed(기존)"
         continue
-    want = ask(key, s["desc"])
+    want = ask(key, s["desc"], s["id"])
     if want is None:
         continue
     if not want:
@@ -197,11 +297,12 @@ for s in manifest.get("skills", []):
     def do(s=s):
         if s.get("installCmd"):
             run(s["installCmd"])
-            return
-        src = skills_base / s["path"]
-        if not src.is_dir():
-            raise FileNotFoundError(f"리포에 소스 폴더 없음: {src}")
-        shutil.copytree(src, home / ".claude/skills" / s["id"])
+        else:
+            src = skills_base / s["path"]
+            if not src.is_dir():
+                raise FileNotFoundError(f"리포에 소스 폴더 없음: {src}")
+            shutil.copytree(src, home / ".claude/skills" / s["id"])
+        verify_skill(s["id"])
 
     install(key, do)
 

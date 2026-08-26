@@ -31,12 +31,21 @@
 ## 3. 진입점 축소
 
 - CLAUDE.md를 얇은 진입점으로 재작성 (STRUCTURE.md 7장 형식)
-- `.cursor/rules/pjt-docs.mdc` 추가
+- 같은 내용으로 `AGENTS.md` 추가
 - `.claude/` 안의 지식성 파일은 이관 확인 후 삭제
 
-## 4. 마무리
+## 4. .baton/ 구성
+
+`.baton/`은 표준의 기본 구성이라 pjt-docs와 함께 만든다 (STRUCTURE.md 8장). 손으로 파일을
+만들지 말고 `baton-init` 스킬을 실행한다. 스킬이 `.baton/README.md` 생성, 진입점 포인터 줄
+추가, 턴 종료 훅 등록, `.gitignore` 정리를 한 번에 처리한다.
+
+1단계에서 "진행 중인데 아직 안 끝난 작업"으로 분류한 내용이 있으면, 스킬 실행 후 각각을
+`.baton/<slug>.md`로 옮긴다. 이미 끝난 작업이면 `status: passed`로 적는다.
+
+## 5. 마무리
 
 - `pjt-docs/README.md` 인덱스 작성 (전 문서 등재). 상단 `표준 갱신일`은 정본 `STRUCTURE.md`의 값을 그대로 적는다 — 이후 [update.md](update.md)가 이 값으로 뒤처짐을 판단한다
 - `pjt-docs/CHANGELOG.md`에 "pjt-docs 구조 도입, X개 문서 이관" 기록
-- `.gitignore`에 `pjt-docs/local/` 추가
+- `.gitignore`에 `pjt-docs/local/` 추가 (`.baton/` 레인은 4단계에서 스킬이 처리한다)
 - 커밋: `docs: pjt-docs 지식관리 구조 도입`
