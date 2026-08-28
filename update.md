@@ -3,9 +3,9 @@
 이미 pjt-docs 구조를 도입한 프로젝트를 최신 표준에 맞추는 절차. AI에게 "pjt-docs 최신 표준으로
 갱신해줘"라고 요청하면 이 절차를 따른다. 최초 도입은 [adopt.md](adopt.md)를 본다.
 
-정본은 이 git 리포다. 갱신은 항상 리포를 최신으로 맞추는 것에서 시작한다.
+기준이 되는 것은 이 git 저장소다. 갱신은 항상 저장소를 최신으로 맞추는 것에서 시작한다.
 
-## 0. 정본 최신화
+## 0. 기준 저장소 최신화
 
 ```bash
 cd <project-templates 클론 경로>   # 전역 CLAUDE.md 블록에 기록돼 있다
@@ -16,31 +16,21 @@ git pull --ff-only
 
 ## 1. 무엇이 프로젝트에 복사되는지 알기
 
-표준 문서(`STRUCTURE.md`)는 프로젝트로 복사되지 않는다. 전역 CLAUDE.md가 리포를 가리키고
-AI가 그때그때 읽는 구조라서, 리포를 pull 하면 저절로 최신이 된다. 따라서 **손으로 갱신해야
+표준 문서(`STRUCTURE.md`)는 프로젝트로 복사되지 않는다. 전역 CLAUDE.md가 저장소를 가리키고
+AI가 그때그때 읽는 구조라서, 저장소를 pull 하면 저절로 최신이 된다. 따라서 **손으로 갱신해야
 하는 대상은 프로젝트에 복사돼 굳어 있는 파일뿐이다.**
 
 | 대상 | 갱신 방식 |
 |---|---|
-| `scripts/check-docs.py` | 정본으로 덮어쓴다. 프로젝트가 손대는 파일이 아니다 |
+| `scripts/check-docs.py` | 저장소의 최신 파일로 덮어쓴다. 프로젝트가 손대는 파일이 아니다 |
 | `CLAUDE.md`, `AGENTS.md` | 규칙 줄만 대조해 빠진 것을 더한다. 프로젝트 고유 내용은 보존한다 |
-| `.cursor/rules/pjt-docs.mdc` | 표준에서 빠졌다. 있으면 지운다 (아래 참조) |
 | `.gitignore` | 빠진 줄만 더한다. 기존 줄은 지우지 않는다 |
-| `.baton/` | 없으면 `baton-init` 스킬로 만든다 (아래 참조). 있으면 배턴 파일은 손대지 않는다 |
+| `.baton/` | 없으면 `baton-init` 스킬로 만든다 (아래 참조). 있으면 배턴 파일의 내용은 손대지 않되, 구 구조(사용자 폴더 없음, `status` 어휘 다름)면 스킬이 사용자 확인 후 옮긴다 |
+| `scripts/baton-hook.mjs`, `.claude/settings.json`의 훅, pre-commit | 스킬이 최신으로 맞춘다. 구 버전 `baton-stop-hook.mjs`는 지우고 교체한다 |
 | `pjt-docs/` 하위 문서 | **건드리지 않는다.** 프로젝트의 지식 그 자체다 |
 
 `pjt-docs/HELP.md`처럼 템플릿에서 통째로 가져온 사람용 문서는, 프로젝트에서 고친 흔적이
-없을 때만 정본으로 교체한다. 고친 흔적이 있으면 차이를 사용자에게 보여주고 판단을 받는다.
-
-### .cursor/rules/pjt-docs.mdc 는 지운다
-
-진입점이 `CLAUDE.md`와 `AGENTS.md` 둘로 줄었다. Cursor도 `AGENTS.md`를 읽으므로 이 파일은
-같은 내용을 한 벌 더 갖고 있을 뿐이고, 한 곳만 고치고 나머지를 잊으면 어느 것이 정본인지
-알 수 없어진다.
-
-`.cursor/rules/`에 이 파일만 있었다면 폴더째 지운다. 프로젝트가 직접 만든 다른 규칙 파일이
-함께 있으면 `pjt-docs.mdc` 하나만 지우고 나머지는 그대로 둔다. 지우기 전에 그 파일에
-프로젝트 고유 규칙이 덧붙어 있지 않은지 확인하고, 있으면 `AGENTS.md`로 옮긴다.
+없을 때만 저장소의 최신 파일로 교체한다. 고친 흔적이 있으면 차이를 사용자에게 보여주고 판단을 받는다.
 
 ### .baton/이 없으면 이 단계에서 도입한다
 
@@ -48,15 +38,25 @@ AI가 그때그때 읽는 구조라서, 리포를 pull 하면 저절로 최신�
 쓰지 말고 `baton-init` 스킬을 실행한다. 그 스킬이 `.baton/README.md` 작성, 진입점 포인터 줄
 추가, 턴 종료 훅 등록, `.gitignore` 정리를 한 번에 처리하며, 이미 있는 조각은 건드리지 않는다.
 
-이미 `.baton/`이 있는 프로젝트라면 그 안의 배턴 파일은 손대지 않는다. `pjt-docs/` 하위 문서와
-같은 이유로, 그 프로젝트의 작업 기록 그 자체다.
+이미 `.baton/`이 있는 프로젝트라면 그 안의 배턴 파일 **내용**은 손대지 않는다. `pjt-docs/`
+하위 문서와 같은 이유로, 그 프로젝트의 작업 기록 그 자체다. 다만 다음 두 경우는 구 구조이므로
+`baton-init` 스킬을 다시 실행해 옮긴다. 스킬이 옮길 목록을 보여주고 사용자 확인을 받는다.
+
+- `.baton/` 최상위에 배턴 파일이 바로 있다 (사용자 폴더 `<이름>/` 없음)
+- `status` 값이 `running | waiting | passed`가 아니다 (예: `in-progress | done`)
+- 훅이 `Stop`·`StopFailure`에만 걸려 있다 (`PreToolUse`와 pre-commit 없음). 구 스크립트
+  `baton-stop-hook.mjs`를 `baton-hook.mjs`로 바꾸고 나머지 두 지점을 건다
+
+`.baton/`이 `.gitignore`나 `.git/info/exclude`에 통째로 올라 있으면 제외를 푼다. 수정 이력이
+배턴에 쌓이는 구조라 git 밖에 두면 다른 PC와 팀원이 볼 수 없다. pjt-docs가 독립 저장소인
+구성이면 `.baton/`을 그 저장소 안으로 옮긴다.
 
 ## 2. 대조
 
-정본 `template/`과 프로젝트를 파일별로 대조한다. 표준이 바뀐 부분만 반영하고, 프로젝트가
+저장소의 `template/`과 프로젝트를 파일별로 대조한다. 표준이 바뀐 부분만 반영하고, 프로젝트가
 의도적으로 다르게 둔 부분은 그대로 남긴다. 판단이 서지 않으면 덮어쓰지 말고 묻는다.
 
-진입점 파일은 규칙 줄 단위로 비교한다. 정본에 있는데 프로젝트에 없는 줄이 이번에 추가된
+진입점 파일은 규칙 줄 단위로 비교한다. 템플릿에 있는데 프로젝트에 없는 줄이 이번에 추가된
 표준이다. 반대로 프로젝트에만 있는 줄은 그 프로젝트 고유 규칙이므로 지우지 않는다.
 
 ## 3. 검사
@@ -69,25 +69,27 @@ python scripts/check-docs.py
 
 ## 4. 마무리
 
-- `pjt-docs/README.md` 상단의 `표준 갱신일`을 정본 `STRUCTURE.md`의 값과 맞춘다.
+- `pjt-docs/README.md` 상단의 `표준 갱신일`을 기준 문서 `STRUCTURE.md`의 값과 맞춘다.
 - `pjt-docs/CHANGELOG.md`에 무엇이 바뀌었는지 한 줄 남긴다.
 - 커밋: `docs: pjt-docs 표준 갱신 (YYYY-MM-DD 기준)`
+- 훅 설정이 바뀌었으면 Claude Code를 재시작한다. 세션 시작 때 읽은 훅 설정을 그 세션 동안
+  쓰기 때문에, 재시작 전에는 새 훅이 돌지 않고 지운 구 스크립트를 찾는 오류가 보일 수 있다
 
 ## 스킬 갱신은 따로다
 
-`~/.claude/skills/`에 설치된 스킬은 프로젝트가 아니라 PC에 붙는다. 갱신은 sync가 한다.
+`~/.claude/skills/`에 설치된 스킬은 프로젝트가 아니라 PC에 붙는다. `baton-init` 스킬을 최신으로
+맞추려면 클론해 둔 project-templates 에서 `git pull` 한 뒤 세팅 스크립트를 다시 실행한다.
 
 ```powershell
-cd project-templates\global-skills
-.\sync.ps1 -Update      # Windows
+cd project-templates
+git pull
+.\setup.ps1        # Windows
 ```
 
 ```bash
-cd project-templates/global-skills
-./sync.sh --update      # macOS / Linux
+cd project-templates
+git pull
+./setup.sh         # macOS / Linux
 ```
 
-`--update`는 새로 설치하지 않고 이미 설치된 것만 최신으로 맞춘다. 리포에 소스가 있는 스킬은
-내용을 대조해서 다를 때만 묻고 교체하므로, 로컬에서 고친 내용을 말없이 덮어쓰지 않는다.
-외부 스킬은 내용을 대조할 수 없어서 설치 명령을 다시 실행할지 물어본다. 플러그인 갱신은
-Claude Code를 재시작해야 반영된다.
+스크립트는 전역 지시가 이미 있으면 건너뛰고, 스킬은 내용이 다를 때만 다시 복사한다.

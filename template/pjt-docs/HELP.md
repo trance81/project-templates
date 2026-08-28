@@ -1,14 +1,17 @@
 # HELP — 이 프로젝트의 AI·지식관리 사용법
 
-사람이 확인차 보는 문서. AI 규칙 정본은 CLAUDE.md/AGENTS.md, 구조 정본은 project-templates 리포의 STRUCTURE.md.
+사람이 확인차 보는 문서. AI 규칙은 CLAUDE.md/AGENTS.md, 구조 표준은 project-templates 저장소의 STRUCTURE.md 를 기준으로 삼는다.
 
 ## 폴더 구조 한눈에
 
 ```
 프로젝트/
-├─ CLAUDE.md, AGENTS.md          AI 진입점 (Claude / Cursor·Codex 등)
+├─ CLAUDE.md, AGENTS.md          AI 진입점 (Claude Code / 그 외 도구)
 ├─ .claude/                      Claude 도구 설정 (지식 없음)
 ├─ scripts/check-docs.py         문서 정합성 검사
+├─ .baton/                       진행 중 작업 + 화면·기능별 수정 이력
+│  ├─ README.md                  운영 규칙 (이 프로젝트의 배턴 단위가 여기 적혀 있음)
+│  └─ <내이름>/<단위>.md          내 배턴. 같은 화면을 다시 고치면 같은 파일에 이력이 쌓임
 └─ pjt-docs/                     ★ 지식은 전부 여기
    ├─ README.md                  지식 지도 (문서 목록·상태) — 여기부터 볼 것
    ├─ CHANGELOG.md               지식이 왜/어떻게 바뀌었나
@@ -32,10 +35,13 @@
 | 문제 해결 기록 | "방금 해결한 거 troubleshooting에 남겨줘" |
 | 문서 상태 점검 | "check-docs 돌리고 문제 정리해줘" |
 | 구조 처음 도입 | "pjt-docs 구조 도입해줘" |
+| 이 화면 지난번에 뭐 고쳤나 | "PSBSOP00400 배턴 수정 이력 보여줘" (단위 식별자로) |
+| 다른 사람 작업 참고 | "hong 폴더의 같은 화면 배턴도 같이 봐줘" (지시해야만 읽음) |
+| 조사만 하고 안 하기로 함 | "이거 안 하기로 한 이유 decisions에 남겨줘" |
 
 ## 문서 규칙 (읽을 때 알아둘 것)
 
-- 각 문서 상단 `status`: **draft**(검증 안 됨) / **active**(정본) / **deprecated**(폐기 — 대체 링크 있음)
+- 각 문서 상단 `status`: **draft**(검증 안 됨) / **active**(유효) / **deprecated**(폐기 — 대체 링크 있음)
 - `source`: 이 지식이 어디서 왔나 (실DB 확인 / 추정 등) — 신뢰도 판단 기준
 - 결정 문서의 `revisit`: 이 조건이 되면 다시 논의 가능하다는 뜻
 
@@ -48,6 +54,6 @@ python scripts/check-docs.py
 
 ## PC 전역 AI 세팅 (프로젝트와 별개)
 
-- 세팅 정본: https://github.com/trance81/project-templates.git 의 SETUP.md
-- 새 PC: 위 리포 클론 → `setup.ps1` → `global-skills/sync.ps1` (플러그인·스킬 y/N 선택 설치)
-- 설치 가능한 플러그인·스킬 목록과 설명: 리포의 `global-skills/manifest.json`
+- 세팅 절차: https://github.com/trance81/project-templates.git 의 SETUP.md
+- 새 PC: 위 저장소를 클론한 뒤 `setup.ps1`(Windows) 또는 `setup.sh`(macOS/Linux) 실행
+- 스크립트가 전역 지시 등록과 `baton-init` 스킬 설치를 함께 처리한다

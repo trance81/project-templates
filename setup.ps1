@@ -18,10 +18,27 @@ $marker
 - 새 프로젝트 시작, 기존 프로젝트 분석/개발 시 STRUCTURE.md의 pjt-docs/ 구조로 지식을 구성·유지할 것
 - 프로젝트에 pjt-docs/가 없으면 도입을 제안할 것
 - 프로젝트 pjt-docs/README.md 상단의 ``표준 갱신일``이 STRUCTURE.md의 값보다 오래됐거나 아예 없으면 update.md 절차로 갱신을 제안할 것
-- ~/.claude/pjt-templates-skills-state.json 이 없으면(스킬 동기화를 한 번도 안 돌린 PC) global-skills/sync 실행을 먼저 안내할 것
 "@
     Add-Content -Path $globalMd -Value $block -Encoding utf8
     Write-Host "등록 완료: $globalMd"
 }
-Write-Host ""
-Write-Host "Cursor는 수동 등록 필요 — SETUP.md의 Cursor 절 참조 (Settings > Rules > User Rules)"
+
+# baton-init 스킬을 ~/.claude/skills/ 로 복사한다. 내용이 같으면 건너뛴다.
+$skillSrc = Join-Path $repoPath "skills/baton-init"
+$skillDst = Join-Path $claudeDir "skills/baton-init"
+if (Test-Path $skillSrc) {
+    $same = $false
+    if (Test-Path $skillDst) {
+        $srcFiles = Get-ChildItem -Recurse -File $skillSrc | Sort-Object FullName
+        $dstFiles = Get-ChildItem -Recurse -File $skillDst | Sort-Object FullName
+        $same = ($srcFiles.Count -eq $dstFiles.Count) -and (($srcFiles | Get-FileHash).Hash -join "," ) -eq (($dstFiles | Get-FileHash).Hash -join ",")
+    }
+    if ($same) {
+        Write-Host "스킬 최신: $skillDst"
+    } else {
+        New-Item -ItemType Directory -Force (Split-Path $skillDst) | Out-Null
+        if (Test-Path $skillDst) { Remove-Item -Recurse -Force $skillDst }
+        Copy-Item -Recurse $skillSrc $skillDst
+        Write-Host "스킬 설치: $skillDst"
+    }
+}

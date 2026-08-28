@@ -18,9 +18,19 @@ $MARKER
 - 새 프로젝트 시작, 기존 프로젝트 분석/개발 시 STRUCTURE.md의 pjt-docs/ 구조로 지식을 구성·유지할 것
 - 프로젝트에 pjt-docs/가 없으면 도입을 제안할 것
 - 프로젝트 pjt-docs/README.md 상단의 \`표준 갱신일\`이 STRUCTURE.md의 값보다 오래됐거나 아예 없으면 update.md 절차로 갱신을 제안할 것
-- ~/.claude/pjt-templates-skills-state.json 이 없으면(스킬 동기화를 한 번도 안 돌린 PC) global-skills/sync 실행을 먼저 안내할 것
 EOF
   echo "등록 완료: $GLOBAL_MD"
 fi
-echo ""
-echo "Cursor는 수동 등록 필요 — SETUP.md의 Cursor 절 참조 (Settings > Rules > User Rules)"
+# baton-init 스킬을 ~/.claude/skills/ 로 복사한다. 내용이 같으면 건너뛴다.
+SKILL_SRC="$REPO_PATH/skills/baton-init"
+SKILL_DST="$HOME/.claude/skills/baton-init"
+if [ -d "$SKILL_SRC" ]; then
+  if [ -d "$SKILL_DST" ] && diff -r -q "$SKILL_SRC" "$SKILL_DST" >/dev/null 2>&1; then
+    echo "스킬 최신: $SKILL_DST"
+  else
+    mkdir -p "$HOME/.claude/skills"
+    rm -rf "$SKILL_DST"
+    cp -R "$SKILL_SRC" "$SKILL_DST"
+    echo "스킬 설치: $SKILL_DST"
+  fi
+fi

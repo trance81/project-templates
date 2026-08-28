@@ -1,46 +1,22 @@
 # 전역 세팅 가이드
 
-새 PC나 새 AI 도구에 이 리포를 "구성 기초"로 등록하는 절차. 이걸 마치면 어떤 프로젝트에서 작업하든 AI가 pjt-docs 구조를 자동 인지하고 유지한다.
+이걸 마치면 어느 프로젝트에서 작업하든 AI가 `pjt-docs/`, `.baton/` 구조를 인지하고 유지합니다.
 
-## 제일 쉬운 방법 — AI에게 시키기
+## 제일 쉬운 방법: AI에게 시키기
 
-새 PC의 Claude CLI(또는 다른 AI 도구)에서 이 한 줄이면 끝난다.
+Claude Code에서 이 한 줄이면 됩니다.
 
 > https://github.com/trance81/project-templates.git 클론해서 SETUP.md대로 전역 세팅해줘
 
-**AI가 따를 절차** (이 문서가 정본이다):
+AI가 따를 절차입니다. 이 문서를 기준으로 삼습니다.
 
-1. 리포를 오래 둘 위치(예: `~/Workspace/project-templates`)에 클론한다. 임시 폴더는 안 된다 —
-   전역 지시가 이 경로를 가리키게 되므로 지워지면 안 되기 때문이다.
-2. `setup.ps1`(Windows) 또는 `setup.sh`(macOS/Linux)를 실행해 전역 지시 블록을 등록한다.
-3. 설치 후보를 뽑는다. 아무것도 바꾸지 않고 목록만 출력한다.
+1. 저장소를 오래 둘 위치(예: `~/Workspace/project-templates`)에 클론합니다. 전역 지시가 이 경로를
+   가리키게 되므로 지워질 임시 폴더는 안 됩니다.
+2. `setup.ps1`(Windows) 또는 `setup.sh`(macOS/Linux)를 실행해 전역 지시 블록을 등록합니다.
 
-   ```powershell
-   .\global-skills\sync.ps1 -List        # Windows
-   ```
-   ```bash
-   ./global-skills/sync.sh --list        # macOS / Linux
-   ```
+여기까지가 표준 세팅의 전부입니다.
 
-4. 그 목록을 사용자에게 정리해서 보여주고 **한 번만 묻는다.** "이대로 전부 설치할까, 뺄 것이
-   있나" 정도면 된다. 항목마다 따로 묻지 않는다.
-5. 답을 그대로 넘겨 설치한다. 고르지 않은 항목은 결정을 남기지 않으므로 다음에 다시 물어본다.
-
-   ```powershell
-   .\global-skills\sync.ps1 -Only baton-init,hallmark
-   ```
-   ```bash
-   ./global-skills/sync.sh --only baton-init,hallmark
-   ```
-
-   전부 설치하기로 했으면 `-Yes` / `--yes` 를 쓴다.
-6. Cursor를 쓰는 PC면 아래 "수동 > Cursor" 절의 블록을 Settings → Rules → User Rules에
-   붙여넣으라고 안내한다. 앱 설정 화면이라 AI가 대신 할 수 없다.
-7. 플러그인을 설치했으면 Claude Code를 재시작해야 반영된다고 알린다.
-
-## 자동 (권장)
-
-리포 클론 후 스크립트 실행:
+## 직접 하기
 
 ```powershell
 # Windows
@@ -56,62 +32,34 @@ cd project-templates
 ./setup.sh
 ```
 
-스크립트가 하는 일:
-1. `~/.claude/CLAUDE.md`(전역 메모리)에 표준 참조 블록 추가 (이미 있으면 건너뜀)
-2. 클론 위치를 블록에 기록 (AI가 STRUCTURE.md를 로컬에서 바로 읽게)
+스크립트가 하는 일은 셋입니다.
 
-## 수동
+1. 전역 메모리 `~/.claude/CLAUDE.md`에 표준 참조 블록을 추가합니다. 이미 있으면 건너뜁니다.
+2. 클론 위치를 그 블록에 기록해, AI가 `STRUCTURE.md`를 로컬에서 바로 읽게 합니다.
+3. `skills/baton-init`을 `~/.claude/skills/baton-init`으로 복사합니다. 내용이 같으면 건너뜁니다.
 
-### Claude Code
+## 수동 등록
 
-`~/.claude/CLAUDE.md`에 아래 블록 추가:
+`~/.claude/CLAUDE.md`에 아래 블록을 추가합니다.
 
 ```markdown
 ## 프로젝트 지식관리 표준 (project-templates)
-- 정본: https://github.com/trance81/project-templates.git (로컬: <클론경로>)
+- 기준 문서: https://github.com/trance81/project-templates.git (로컬: <클론경로>)
 - 새 프로젝트 시작, 기존 프로젝트 분석/개발 시 STRUCTURE.md의 pjt-docs/ 구조로 지식을 구성·유지할 것
 - 프로젝트에 pjt-docs/가 없으면 도입을 제안할 것
 - 프로젝트 pjt-docs/README.md 상단의 `표준 갱신일`이 STRUCTURE.md의 값보다 오래됐거나 아예 없으면 update.md 절차로 갱신을 제안할 것
-- ~/.claude/pjt-templates-skills-state.json 이 없으면(스킬 동기화를 한 번도 안 돌린 PC) global-skills/sync 실행을 먼저 안내할 것
 ```
 
-### Cursor
+스크립트를 쓰지 않고 손으로 등록했다면 `skills/baton-init` 폴더를 `~/.claude/skills/baton-init`으로
+복사합니다. `.baton/` 도입을 이 스킬이 처리합니다.
 
-Cursor는 파일 기반 전역 규칙이 없다. Settings → Rules → User Rules에 위 블록을 붙여넣는다.
-프로젝트 단위로는 템플릿의 `AGENTS.md`를 Cursor가 자동으로 읽는다.
+### 기타 AI 도구 (Codex, Cursor 등)
 
-### 기타 AI 도구 (Codex, Copilot 등 — 향후)
-
-- 전역 지시 파일을 지원하면(예: `~/.codex/AGENTS.md`) 같은 블록을 추가
-- 프로젝트 단위는 pjt-docs/ 자체가 일반 md 폴더라 어떤 AI든 읽을 수 있음 — 진입점 파일(CLAUDE.md 상당)만 그 도구 규약에 맞게 한 장 추가
-
-## 전역 플러그인/스킬 동기화
-
-`global-skills/manifest.json`에 이 리포로 관리하는 마켓플레이스·플러그인·스킬 목록이 있다. 새 PC에서, 혹은 리포가 갱신된 뒤 실행하면 **아직 설치 여부를 정하지 않은 항목만** 하나씩 물어보고, 선택한 것만 설치한다.
-
-`skills` 항목은 두 가지 방식으로 설치된다. `installCmd`가 있으면 그 명령을 실행하고(`npx skills add` 등), `path`가 있으면 이 리포에 보관된 소스를 `~/.claude/skills/<id>`로 복사한다. 어느 쪽이든 설치 위치는 같다.
-
-```powershell
-# Windows
-cd project-templates\global-skills
-.\sync.ps1
-```
-
-```bash
-# macOS / Linux
-cd project-templates/global-skills
-./sync.sh
-```
-
-- 이미 설치돼 있거나 이전에 "설치/건너뜀"으로 결정한 항목은 다시 안 물어본다 (결정은 `~/.claude/pjt-templates-skills-state.json`에 기록).
-- 리포에 새 항목이 추가된 뒤 재실행하면 **그 신규 항목만** 물어본다 — 기존 결정은 그대로 유지.
-- 설치하지 않고 후보만 보려면: `.\sync.ps1 -List` / `./sync.sh --list`
-- 고른 것만 묻지 않고 설치하려면: `.\sync.ps1 -Only a,b` / `./sync.sh --only a,b`
-- 건너뛴 항목을 다시 검토하려면: `.\sync.ps1 -Review` / `./sync.sh --review`
-- 이미 설치된 것을 최신으로 갱신하려면: `.\sync.ps1 -Update` / `./sync.sh --update`. 새로 설치하지는 않고, 리포에 소스가 있는 스킬은 내용을 대조해 다를 때만 묻고 교체한다. 플러그인 갱신은 Claude Code 재시작 후 반영된다.
-- 새 플러그인을 설치했으면 `global-skills/manifest.json`에 항목을 추가해 다른 PC에도 전파되게 할 것.
+- 전역 지시 파일을 지원하면(예: `~/.codex/AGENTS.md`) 같은 블록을 추가합니다.
+- 프로젝트 단위는 `pjt-docs/` 자체가 일반 Markdown 폴더라 어떤 AI든 읽을 수 있습니다. 진입점
+  파일(`CLAUDE.md` 상당)만 그 도구 규약에 맞게 한 장 추가하면 됩니다.
 
 ## 확인
 
-아무 프로젝트에서나 AI에게 "이 프로젝트 지식구조 어떻게 관리해?"라고 물었을 때 pjt-docs/ 구조를 답하면 성공.
-`cd global-skills && ./sync.sh` (또는 `.\sync.ps1`) 실행 시 새로 추가된 항목만 물어보면 성공.
+아무 프로젝트에서나 AI에게 "이 프로젝트 지식구조 어떻게 관리해?"라고 물었을 때 `pjt-docs/`
+구조를 답하면 성공입니다. `~/.claude/skills/baton-init/SKILL.md`가 있으면 스킬 설치도 된 것입니다.
