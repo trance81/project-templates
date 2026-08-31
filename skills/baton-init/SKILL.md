@@ -173,7 +173,7 @@ Claude Code 스니펫만 들어 있다. 다른 도구를 쓴다면 설정 형식
 
 | 지점 | 조건 | 동작 |
 |---|---|---|
-| `SessionStart` | 언제나 | exit 0. `owner`와 열린 배턴 목록을 stdout 으로 알린다. `owner`가 없으면 `.baton/` 아래 폴더를 후보로 보여주고 묻게 한다. 열린 배턴이 없는데 커밋되지 않은 변경이 있으면 그것도 알린다. 동시에 그 시점의 변경 목록을 `.session/<id>.baseline`에 기준선으로 남긴다 |
+| `SessionStart` | 언제나 | exit 0. 이 프로젝트의 baton 구성이 표준보다 뒤처졌으면 먼저 알린다. `owner`와 열린 배턴 목록을 stdout 으로 알린다. `owner`가 없으면 `.baton/` 아래 폴더를 후보로 보여주고 묻게 한다. 열린 배턴이 없는데 커밋되지 않은 변경이 있으면 그것도 알린다. 동시에 그 시점의 변경 목록을 `.session/<id>.baseline`에 기준선으로 남긴다 |
 | `Stop` | **이번 세션이** `.baton/` 밖 파일을 새로 바꿨는데, 열린 배턴도 없고 `.baton/<이름>/` 배턴 파일도 함께 바뀌지 않았다 | exit 2. 턴 종료 거부. 세션당 3회까지, 그 뒤엔 경고만 남기고 통과 |
 
 **판정 기준은 git 작업 트리의 변경이되, 이번 세션이 만든 것만 센다.** SessionStart 가 세션
@@ -277,4 +277,7 @@ Claude Code 훅은 실제 턴 밖에서 발동시킬 방법이 없으므로 스�
 - `baton-readme.md`: `.baton/README.md` 내용이며, 자리표시자는 `{{BATON_UNIT}}`과
   `{{CHANGELOG_LINE}}` 둘이다.
 - `baton-hook.mjs`: `SessionStart`와 `Stop`이 공용으로 쓰는 스크립트이며 자리표시자가 없다.
+  맨 위의 `BATON_VERSION` 상수가 이 스크립트의 판이며 `STRUCTURE.md`의 "표준 갱신일"과 같은
+  값을 쓴다. **표준 갱신일을 올릴 때 이 값도 함께 올린다.** 두 값이 어긋나면 뒤처짐 알림이
+  엉뚱한 시점에 뜨거나 아예 안 뜬다.
 - `settings-snippet.json`: `.claude/settings.json`에 병합할 Claude Code 훅 설정이다.

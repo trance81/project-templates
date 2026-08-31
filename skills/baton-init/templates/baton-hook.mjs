@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Baton 훅 — 두 지점에서만 동작한다.
 //
-//   1. SessionStart  세션을 시작할 때 owner 와 진행 중인 배턴을 보여준다. 아무것도 막지 않는다.
+//   1. SessionStart  세션을 시작할 때 owner 와 진행 중인 배턴을 보여주고, 이 프로젝트의 baton
+//                    구성이 표준보다 뒤처졌으면 그것도 알린다. 아무것도 막지 않는다.
 //   2. Stop          .baton/ 밖 변경이 남아 있는데 배턴이 없으면 턴 종료를 거부한다.
 //
 // "열린 배턴" 은 .baton/<owner>/ 최상위에 있는 status: running 또는 waiting 인 .md 파일이다.
@@ -25,7 +26,13 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
+import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
+
+// 이 스크립트의 판. STRUCTURE.md 의 "표준 갱신일" 과 같은 값을 쓴다. 프로젝트에 복사된 사본은
+// 설치 시점의 값을 그대로 들고 있으므로, 전역 스킬(정본의 거울)의 값과 비교하면 이 프로젝트가
+// 표준보다 뒤처졌는지 세션 시작 때 알 수 있다. 표준을 올릴 때 이 값도 함께 올린다.
+const BATON_VERSION = "2026-08-31";
 
 const MAX_ANCESTOR_DEPTH = 20;
 const MAX_STOP_BLOCKS = 3;
@@ -167,6 +174,42 @@ function changesSinceBaseline(baseline, repo, outside) {
   });
 }
 
+// ---------- 판 비교 ----------
+//
+// 전역 스킬 폴더의 훅 스크립트에서 BATON_VERSION 을 읽어 이 사본과 비교한다. 전역 스킬은
+// project-templates 를 git pull 할 때 갱신되므로 정본의 거울 역할을 한다. 문서에 적힌 날짜를
+// 모델이 읽고 판단하는 방식과 달리 파일을 직접 비교하므로, 컨텍스트가 압축되어도 매번 정확하다.
+// 전역 스킬이 없는 기기에서는 조용히 넘어간다.
+
+const GLOBAL_HOOK = join(homedir(), ".claude", "skills", "baton-init", "templates", "baton-hook.mjs");
+
+function globalVersion() {
+  try {
+    const head = readFileSync(GLOBAL_HOOK, "utf8").slice(0, 4096);
+    const m = /BATON_VERSION\s*=\s*"(\d{4}-\d{2}-\d{2})"/.exec(head);
+    return m ? m[1] : null;
+  } catch {
+    return null; // 전역 스킬이 설치되지 않은 기기 — 비교할 대상이 없다
+  }
+}
+
+// 판이 어긋났을 때 알릴 문구. 어긋나지 않았거나 비교할 수 없으면 null.
+function versionNotice() {
+  const latest = globalVersion();
+  if (!latest || latest === BATON_VERSION) return null;
+  if (latest > BATON_VERSION) {
+    return [
+      `[baton] 이 프로젝트의 baton 구성이 표준보다 뒤처져 있습니다 (설치 ${BATON_VERSION} / 최신 ${latest}).`,
+      '사용자에게 "업데이트해" 라고 하면 project-templates 의 update.md 절차로 갱신한다고 알리십시오.',
+      "갱신은 사용자 승인 뒤에 합니다. 먼저 하지 마십시오.",
+    ].join("\n");
+  }
+  return [
+    `[baton] 전역 baton 스킬이 이 프로젝트보다 낡았습니다 (전역 ${latest} / 이 프로젝트 ${BATON_VERSION}).`,
+    "project-templates 저장소를 git pull 하고 skills/baton-init 을 ~/.claude/skills/ 로 다시 복사해야 합니다.",
+  ].join("\n");
+}
+
 function formatList(paths) {
   const head = paths.slice(0, 8).join(", ");
   return paths.length > 8 ? `${head} 외 ${paths.length - 8}건` : head;
@@ -222,6 +265,10 @@ function sessionStart(root, cwd, sessionId) {
   const ch = changedFiles(cwd);
   // 이 세션이 무엇을 바꿨는지 Stop 이 판별할 수 있도록 지금의 변경 목록을 기준선으로 남긴다.
   if (ch) writeBaseline(root, sessionId, ch.repo, ch.outside);
+
+  // 판이 어긋났으면 owner 유무와 무관하게 먼저 알린다.
+  const notice = versionNotice();
+  if (notice) process.stdout.write(notice + "\n");
 
   const owner = readOwner(root);
   if (!owner) {

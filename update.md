@@ -74,6 +74,8 @@ python scripts/check-docs.py
 
 - `pjt-docs/README.md` 상단의 `표준 갱신일`을 기준 문서 `STRUCTURE.md`의 값과 맞춘다.
 - 커밋: `docs: pjt-docs 표준 갱신 (YYYY-MM-DD 기준)`
+- 훅 스크립트를 교체했으면 `BATON_VERSION` 값이 `STRUCTURE.md`의 표준 갱신일과 같은지 확인한다.
+  이 값으로 다음 세션이 뒤처짐을 판단한다.
 - 훅 설정이 바뀌었으면 Claude Code를 재시작한다. 세션 시작 때 읽은 훅 설정을 그 세션 동안
   쓰기 때문에, 재시작 전에는 새 훅이 돌지 않고 지운 구 스크립트를 찾는 오류가 보일 수 있다
 
