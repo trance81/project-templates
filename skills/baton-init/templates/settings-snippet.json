@@ -1,13 +1,13 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/baton-hook.mjs"]
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/baton-hook.mjs\"",
+            "timeout": 10
           }
         ]
       }
@@ -17,19 +17,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/baton-hook.mjs"]
-          }
-        ]
-      }
-    ],
-    "StopFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/baton-hook.mjs"]
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/baton-hook.mjs\"",
+            "timeout": 10
           }
         ]
       }

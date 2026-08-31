@@ -26,7 +26,7 @@ AI가 그때그때 읽는 구조라서, 저장소를 pull 하면 저절로 최�
 | `CLAUDE.md`, `AGENTS.md` | 규칙 줄만 대조해 빠진 것을 더한다. 프로젝트 고유 내용은 보존한다 |
 | `.gitignore` | 빠진 줄만 더한다. 기존 줄은 지우지 않는다 |
 | `.baton/` | 없으면 `baton-init` 스킬로 만든다 (아래 참조). 있으면 배턴 파일의 내용은 손대지 않되, 구 구조(사용자 폴더 없음, `status` 어휘 다름)면 스킬이 사용자 확인 후 옮긴다 |
-| `scripts/baton-hook.mjs`, `.claude/settings.json`의 훅, pre-commit | 스킬이 최신으로 맞춘다. 구 버전 `baton-stop-hook.mjs`는 지우고 교체한다 |
+| `scripts/baton-hook.mjs`, `.claude/settings.json`의 훅 | 스킬이 최신으로 맞춘다. 구 버전 `baton-stop-hook.mjs`와 구 버전이 설치한 git pre-commit 은 지운다 |
 | `pjt-docs/` 하위 문서 | **건드리지 않는다.** 프로젝트의 지식 그 자체다 |
 
 `pjt-docs/HELP.md`처럼 템플릿에서 통째로 가져온 사람용 문서는, 프로젝트에서 고친 흔적이
@@ -36,7 +36,8 @@ AI가 그때그때 읽는 구조라서, 저장소를 pull 하면 저절로 최�
 
 `.baton/`은 표준의 기본 구성이므로, 갱신 대상 프로젝트에 없으면 이때 만든다. 직접 파일을
 쓰지 말고 `baton-init` 스킬을 실행한다. 그 스킬이 `.baton/README.md` 작성, 진입점 포인터 줄
-추가, 턴 종료 훅 등록, `.gitignore` 정리를 한 번에 처리하며, 이미 있는 조각은 건드리지 않는다.
+추가, 세션 시작·턴 종료 훅 등록, `.gitignore` 정리를 한 번에 처리하며, 이미 있는 조각은
+건드리지 않는다.
 
 이미 `.baton/`이 있는 프로젝트라면 그 안의 배턴 파일 **내용**은 손대지 않는다. `pjt-docs/`
 하위 문서와 같은 이유로, 그 프로젝트의 작업 기록 그 자체다. 다만 다음 두 경우는 구 구조이므로
@@ -44,8 +45,10 @@ AI가 그때그때 읽는 구조라서, 저장소를 pull 하면 저절로 최�
 
 - `.baton/` 최상위에 배턴 파일이 바로 있다 (사용자 폴더 `<이름>/` 없음)
 - `status` 값이 `running | waiting | passed`가 아니다 (예: `in-progress | done`)
-- 훅이 `Stop`·`StopFailure`에만 걸려 있다 (`PreToolUse`와 pre-commit 없음). 구 스크립트
-  `baton-stop-hook.mjs`를 `baton-hook.mjs`로 바꾸고 나머지 두 지점을 건다
+- 훅이 `PreToolUse`나 `StopFailure`에 걸려 있거나 스크립트 이름이 `baton-stop-hook.mjs`다.
+  새 스크립트는 `SessionStart`와 `Stop` 둘만 처리하므로 나머지 이벤트 항목은 지운다
+- `.git/hooks/pre-commit`(또는 husky 등)에 `baton-hook.mjs --pre-commit` 호출이 남아 있다.
+  새 스크립트에는 그 진입점이 없어서 그대로 두면 커밋할 때마다 오류가 난다. 그 줄을 지운다
 
 `.baton/`이 `.gitignore`나 `.git/info/exclude`에 통째로 올라 있으면 제외를 푼다. 수정 이력이
 배턴에 쌓이는 구조라 git 밖에 두면 다른 PC와 팀원이 볼 수 없다. pjt-docs가 독립 저장소인
@@ -70,7 +73,6 @@ python scripts/check-docs.py
 ## 4. 마무리
 
 - `pjt-docs/README.md` 상단의 `표준 갱신일`을 기준 문서 `STRUCTURE.md`의 값과 맞춘다.
-- `pjt-docs/CHANGELOG.md`에 무엇이 바뀌었는지 한 줄 남긴다.
 - 커밋: `docs: pjt-docs 표준 갱신 (YYYY-MM-DD 기준)`
 - 훅 설정이 바뀌었으면 Claude Code를 재시작한다. 세션 시작 때 읽은 훅 설정을 그 세션 동안
   쓰기 때문에, 재시작 전에는 새 훅이 돌지 않고 지운 구 스크립트를 찾는 오류가 보일 수 있다
