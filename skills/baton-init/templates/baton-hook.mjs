@@ -12,7 +12,8 @@
 //
 // Stop 은 exit 2 와 stderr 로 거부한다. Claude Code 는 exit 2 일 때의 stderr 를 모델에게 돌려준다.
 // 거부가 무한히 반복되지 않도록 한 세션에서 MAX_STOP_BLOCKS 번까지만 막고, 그 뒤에는 경고만
-// 남기고 통과시킨다. SessionStart 는 stdout 으로 안내를 내보내며 종료 코드는 언제나 0 이다.
+// 남기고 통과시킨다. SessionStart 는 systemMessage 와 additionalContext 를 담은 JSON 을 내보낸다.
+// 전자는 세션을 연 사람의 화면에 찍히고 후자는 모델 컨텍스트로 들어간다. 종료 코드는 언제나 0 이다.
 //
 // 판정 기준은 git 작업 트리의 변경이되, **이번 세션이 만든 변경**만 센다. SessionStart 가 그
 // 시점의 변경 목록을 기준선으로 적어 두고 Stop 이 그것과 비교한다. 그래서 잡담, 지식 질의,
@@ -210,6 +211,21 @@ function versionNotice() {
   ].join("\n");
 }
 
+// SessionStart 의 출력 형식.
+//
+// 평문을 stdout 에 쓰면 모델 컨텍스트로만 들어가고 사람 화면에는 보이지 않는다. 화면에 찍히게
+// 하려면 systemMessage 키를 담은 JSON 을 내보내야 한다. 둘 다 필요하므로 한 번에 낸다.
+// systemMessage 는 세션을 연 사람이 배턴 목록을 바로 보게 하고, additionalContext 는 모델이
+// 그 맥락을 들고 첫 턴을 시작하게 한다.
+function emitSessionStart(text) {
+  process.stdout.write(
+    JSON.stringify({
+      systemMessage: text,
+      hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: text },
+    }) + "\n",
+  );
+}
+
 function formatList(paths) {
   const head = paths.slice(0, 8).join(", ");
   return paths.length > 8 ? `${head} 외 ${paths.length - 8}건` : head;
@@ -260,24 +276,26 @@ function bumpBlockCount(root, sessionId) {
 
 // ---------- 각 지점 ----------
 
-// 세션 시작 안내. 아무것도 막지 않으며, stdout 에 쓴 내용이 모델의 컨텍스트로 들어간다.
+// 세션 시작 안내. 아무것도 막지 않으며, 사람의 화면과 모델의 컨텍스트 양쪽으로 나간다.
 function sessionStart(root, cwd, sessionId) {
   const ch = changedFiles(cwd);
   // 이 세션이 무엇을 바꿨는지 Stop 이 판별할 수 있도록 지금의 변경 목록을 기준선으로 남긴다.
   if (ch) writeBaseline(root, sessionId, ch.repo, ch.outside);
 
-  // 판이 어긋났으면 owner 유무와 무관하게 먼저 알린다.
+  // 판이 어긋났으면 owner 유무와 무관하게 먼저 알린다. 아래에서 한 번에 내보낸다.
+  const head = [];
   const notice = versionNotice();
-  if (notice) process.stdout.write(notice + "\n");
+  if (notice) head.push(notice);
 
   const owner = readOwner(root);
   if (!owner) {
-    process.stdout.write(ownerMissingMessage(root) + "\n");
+    head.push(ownerMissingMessage(root));
+    emitSessionStart(head.join("\n"));
     return;
   }
 
   const open = openBatons(root, owner);
-  const lines = [`[baton] owner: ${owner}`];
+  const lines = [...head, `[baton] owner: ${owner}`];
 
   if (open.length > 0) {
     lines.push(`진행 중인 배턴이 ${open.length}건 있습니다. 새 작업을 시작하기 전에 먼저 읽고 정리하십시오.`);
@@ -291,7 +309,7 @@ function sessionStart(root, cwd, sessionId) {
     }
   }
   lines.push("다른 사람의 폴더는 사용자가 지시할 때에만 엽니다.");
-  process.stdout.write(lines.join("\n") + "\n");
+  emitSessionStart(lines.join("\n"));
 }
 
 function guardStop(root, sessionId, cwd) {
